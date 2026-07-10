@@ -1,0 +1,897 @@
+/**
+ * 今晚吃什么 ❤️ - 情侣点餐应用 v2.1
+ * 启动页 + 角色命名 + 三大分页 + 日历历史
+ */
+
+// ============================
+// 菜品数据库 - 饭店菜单风格
+// ============================
+const DISHES_DB = [
+    { category: '🔥 热菜', emoji: '🥩', items: [
+        { name: '红烧肉', emoji: '🥩' },
+        { name: '宫保鸡丁', emoji: '🍗' },
+        { name: '鱼香肉丝', emoji: '🐟' },
+        { name: '糖醋里脊', emoji: '🥓' },
+        { name: '麻婆豆腐', emoji: '🫘' },
+        { name: '回锅肉', emoji: '🥩' },
+        { name: '水煮鱼', emoji: '🐟' },
+        { name: '干煸四季豆', emoji: '🥬' },
+        { name: '番茄炒蛋', emoji: '🍅' },
+        { name: '青椒肉丝', emoji: '🌶️' },
+        { name: '可乐鸡翅', emoji: '🍗' },
+        { name: '蒜蓉西兰花', emoji: '🥦' }
+    ]},
+    { category: '🥗 凉菜', emoji: '🥗', items: [
+        { name: '凉拌黄瓜', emoji: '🥒' },
+        { name: '皮蛋豆腐', emoji: '🫘' },
+        { name: '凉拌木耳', emoji: '🍄' },
+        { name: '口水鸡', emoji: '🍗' },
+        { name: '凉拌海带', emoji: '🌿' },
+        { name: '拍黄瓜', emoji: '🥒' }
+    ]},
+    { category: '🍲 汤类', emoji: '🍲', items: [
+        { name: '番茄蛋汤', emoji: '🍅' },
+        { name: '紫菜蛋花汤', emoji: '🥚' },
+        { name: '排骨汤', emoji: '🍖' },
+        { name: '酸辣汤', emoji: '🌶️' },
+        { name: '玉米排骨汤', emoji: '🌽' },
+        { name: '冬瓜汤', emoji: '🥬' }
+    ]},
+    { category: '🍚 主食', emoji: '🍚', items: [
+        { name: '米饭', emoji: '🍚' },
+        { name: '面条', emoji: '🍜' },
+        { name: '饺子', emoji: '🥟' },
+        { name: '炒饭', emoji: '🍚' },
+        { name: '馒头', emoji: '🥖' },
+        { name: '包子', emoji: '🥟' },
+        { name: '炒面', emoji: '🍜' }
+    ]},
+    { category: '🥤 饮品', emoji: '🥤', items: [
+        { name: '可乐', emoji: '🥤' },
+        { name: '雪碧', emoji: '🥤' },
+        { name: '果汁', emoji: '🧃' },
+        { name: '奶茶', emoji: '🧋' },
+        { name: '咖啡', emoji: '☕' },
+        { name: '柠檬水', emoji: '🍋' }
+    ]},
+    { category: '🍰 甜品', emoji: '🍰', items: [
+        { name: '蛋糕', emoji: '🎂' },
+        { name: '冰淇淋', emoji: '🍦' },
+        { name: '布丁', emoji: '🍮' },
+        { name: '水果捞', emoji: '🍎' },
+        { name: '酸奶', emoji: '🥛' },
+        { name: '双皮奶', emoji: '🍮' }
+    ]}
+];
+
+// ============================
+// 数据管理
+// ============================
+const Storage = {
+    KEY: 'couple_dinner_v2',
+
+    getAll() {
+        try {
+            const data = localStorage.getItem(this.KEY);
+            return data ? JSON.parse(data) : this.getDefault();
+        } catch {
+            return this.getDefault();
+        }
+    },
+
+    getDefault() {
+        return {
+            members: [],
+            todayOrders: [],    // 今日订单 [{id, dishName, emoji, category, memberId, orderedAt}]
+            historyDates: {}    // { '2026/7/10': [orders], '2026/7/9': [orders] }
+        };
+    },
+
+    save(data) {
+        try {
+            localStorage.setItem(this.KEY, JSON.stringify(data));
+        } catch (e) {
+            console.error('保存失败:', e);
+        }
+    },
+
+    // === 成员 ===
+    getMembers() { return this.getAll().members; },
+    getMember(id) { return this.getMembers().find(m => m.id === id) || null; },
+    addMember(gender, name) {
+        const d = this.getAll();
+        const member = {
+            id: 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+            gender,
+            name: name.trim()
+        };
+        d.members.push(member);
+        this.save(d);
+        return member;
+    },
+
+    // === 今日订单 ===
+    getTodayOrders() { return this.getAll().todayOrders; },
+    addOrder(dishName, emoji, category, memberId) {
+        const d = this.getAll();
+        const order = {
+            id: Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+            dishName: dishName.trim(),
+            emoji,
+            category,
+            memberId,
+            orderedAt: Date.now()
+        };
+        d.todayOrders.push(order);
+        this.save(d);
+        return order;
+    },
+    removeOrder(orderId) {
+        const d = this.getAll();
+        d.todayOrders = d.todayOrders.filter(o => o.id !== orderId);
+        this.save(d);
+    },
+    clearTodayOrders() {
+        const d = this.getAll();
+        d.todayOrders = [];
+        this.save(d);
+    },
+
+    // === 历史 ===
+    getHistory() { return this.getAll().historyDates; },
+    // 将今日订单存入历史（每天0:00自动调用）
+    archiveTodayToHistory() {
+        const d = this.getAll();
+        const today = new Date().toLocaleDateString('zh-CN');
+        if (d.todayOrders.length > 0) {
+            d.historyDates[today] = [...d.todayOrders];
+            this.save(d);
+        }
+    },
+    getHistoryByDate(dateStr) {
+        const h = this.getHistory();
+        return h[dateStr] || [];
+    },
+    getDatesWithOrders() {
+        return Object.keys(this.getHistory());
+    }
+};
+
+// ============================
+// 应用状态
+// ============================
+const App = {
+    data: null,
+    currentMemberId: null,
+    currentCategory: 0,
+    calendarYear: 0,
+    calendarMonth: 0,
+    selectedDate: null,
+
+    init() {
+        this.data = Storage.getAll();
+        // 自动检测日期变更，将昨天的订单归档
+        this.checkDateChange();
+    },
+
+    checkDateChange() {
+        const lastDate = localStorage.getItem('couple_last_date');
+        const today = new Date().toLocaleDateString('zh-CN');
+        if (lastDate && lastDate !== today) {
+            // 日期变了，归档
+            Storage.archiveTodayToHistory();
+            Storage.clearTodayOrders();
+        }
+        localStorage.setItem('couple_last_date', today);
+    },
+
+    getCurrentMember() {
+        return this.data.members.find(m => m.id === this.currentMemberId) || null;
+    },
+
+    isDishOrdered(dishName) {
+        return this.data.todayOrders.some(o => o.dishName === dishName && o.memberId === this.currentMemberId);
+    },
+
+    getCategoryOrdersCount(category) {
+        return this.data.todayOrders.filter(o => o.category === category).length;
+    }
+};
+
+// ============================
+// UI 控制器
+// ============================
+const UI = {
+    els: {},
+
+    cacheElements() {
+        this.els = {
+            // 启动页
+            splashScreen: document.getElementById('splash-screen'),
+
+            // 设置界面
+            setupScreen: document.getElementById('setup-screen'),
+            roleSetup: document.getElementById('role-setup'),
+            genderOptions: document.querySelectorAll('.gender-option'),
+            memberNameInput: document.getElementById('member-name-input'),
+            confirmRoleBtn: document.getElementById('confirm-role-btn'),
+
+            // 主应用
+            mainApp: document.getElementById('main-app'),
+            memberAvatar: document.getElementById('member-avatar'),
+            memberName: document.getElementById('member-name'),
+            switchMemberBtn: document.getElementById('switch-member-btn'),
+            tabBtns: document.querySelectorAll('.tab-btn'),
+            tabOrder: document.getElementById('tab-order'),
+            tabToday: document.getElementById('tab-today'),
+            tabHistory: document.getElementById('tab-history'),
+
+            // Tab1 - 点菜
+            orderSearch: document.getElementById('order-search'),
+            categoryTabs: document.getElementById('category-tabs'),
+            dishScrollList: document.getElementById('dish-scroll-list'),
+
+            // Tab2 - 今日总览
+            todaySummary: document.getElementById('today-summary'),
+            todayDishes: document.getElementById('today-dishes'),
+            shareTodayBtn: document.getElementById('share-today-btn'),
+            clearTodayBtn: document.getElementById('clear-today-btn'),
+
+            // Tab3 - 历史
+            calendarPrev: document.getElementById('calendar-prev'),
+            calendarNext: document.getElementById('calendar-next'),
+            calendarMonthLabel: document.getElementById('calendar-month-label'),
+            calendarGrid: document.getElementById('calendar-grid'),
+            historyDetail: document.getElementById('history-detail'),
+
+            // 模态框
+            memberModal: document.getElementById('member-modal'),
+            memberListModal: document.getElementById('member-list-modal'),
+            memberModalClose: document.getElementById('member-modal-close'),
+            confirmModal: document.getElementById('confirm-modal'),
+            modalTitle: document.getElementById('modal-title'),
+            modalText: document.getElementById('modal-text'),
+            modalConfirm: document.getElementById('modal-confirm'),
+            modalCancel: document.getElementById('modal-cancel'),
+            toastContainer: document.getElementById('toast-container')
+        };
+    },
+
+    // ============================
+    // 设置流程
+    // ============================
+    initSetup() {
+        // 性别选择
+        this.els.genderOptions.forEach(opt => {
+            opt.addEventListener('click', () => {
+                this.els.genderOptions.forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                this.checkRoleReady();
+            });
+        });
+
+        // 昵称输入
+        this.els.memberNameInput.addEventListener('input', () => this.checkRoleReady());
+        this.els.memberNameInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !this.els.confirmRoleBtn.disabled) {
+                this.handleConfirmRole();
+            }
+        });
+
+        // 确认角色
+        this.els.confirmRoleBtn.addEventListener('click', () => this.handleConfirmRole());
+    },
+
+    checkRoleReady() {
+        const hasGender = document.querySelector('.gender-option.selected') !== null;
+        const hasName = this.els.memberNameInput.value.trim().length > 0;
+        this.els.confirmRoleBtn.disabled = !(hasGender && hasName);
+    },
+
+    handleConfirmRole() {
+        const selected = document.querySelector('.gender-option.selected');
+        const gender = selected.dataset.gender;
+        const name = this.els.memberNameInput.value.trim();
+        if (!name) {
+            this.showToast('📝 请输入你的昵称');
+            return;
+        }
+        const member = Storage.addMember(gender, name);
+        App.currentMemberId = member.id;
+        App.data = Storage.getAll();
+        this.enterMainApp(member);
+    },
+
+    enterMainApp(member) {
+        this.els.setupScreen.classList.remove('active');
+        this.els.mainApp.classList.add('active');
+        // 更新显示
+        this.els.memberAvatar.textContent = member.gender === 'male' ? '👨' : '👩';
+        this.els.memberName.textContent = member.name;
+        // 渲染主界面
+        this.initCalendar();
+        this.renderDishList();
+        this.renderTodayTab();
+        this.renderCalendar();
+    },
+
+    generateCode() {
+        return Math.random().toString(36).substr(2, 6).toUpperCase();
+    },
+
+    // ============================
+    // 成员切换
+    // ============================
+    setupMemberSwitch() {
+        this.els.switchMemberBtn.addEventListener('click', () => this.showMemberModal());
+        this.els.memberModalClose.addEventListener('click', () => {
+            this.els.memberModal.classList.add('hidden');
+        });
+        this.els.memberModal.addEventListener('click', (e) => {
+            if (e.target === this.els.memberModal) {
+                this.els.memberModal.classList.add('hidden');
+            }
+        });
+    },
+
+    showMemberModal() {
+        const members = App.data.members;
+        this.els.memberListModal.innerHTML = members.map(m => {
+            const avatar = m.gender === 'male' ? '👨' : '👩';
+            const isActive = m.id === App.currentMemberId;
+            return `
+                <div class="member-list-item ${isActive ? 'active' : ''}" data-member-id="${m.id}">
+                    <span class="mli-avatar">${avatar}</span>
+                    <span class="mli-name">${this.escapeHtml(m.name)}</span>
+                    ${isActive ? '<span class="mli-check">✅</span>' : '<span class="mli-check" style="color:#ccc;">○</span>'}
+                </div>
+            `;
+        }).join('');
+        this.els.memberListModal.querySelectorAll('.member-list-item').forEach(el => {
+            el.addEventListener('click', () => {
+                const mid = el.dataset.memberId;
+                App.currentMemberId = mid;
+                const member = App.getCurrentMember();
+                this.els.memberAvatar.textContent = member.gender === 'male' ? '👨' : '👩';
+                this.els.memberName.textContent = member.name;
+                this.els.memberModal.classList.add('hidden');
+                this.renderDishList();
+                this.renderTodayTab();
+                this.showToast(`👤 已切换到 ${member.name}`);
+            });
+        });
+    },
+
+    // ============================
+    // Tab 切换
+    // ============================
+    setupTabSwitch() {
+        this.els.tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.els.tabBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const tab = btn.dataset.tab;
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                document.getElementById('tab-' + tab).classList.add('active');
+                // 切换时刷新
+                if (tab === 'today') this.renderTodayTab();
+                if (tab === 'history') this.renderCalendar();
+                if (tab === 'order') this.renderDishList();
+            });
+        });
+    },
+
+    // ============================
+    // Tab 1: 点菜界面
+    // ============================
+    renderDishList(searchTerm) {
+        // 渲染分类标签
+        this.renderCategoryTabs();
+        // 渲染菜品
+        this.renderDishCards(searchTerm);
+        // 搜索
+        this.els.orderSearch.addEventListener('input', () => {
+            this.renderDishCards(this.els.orderSearch.value);
+        });
+    },
+
+    renderCategoryTabs() {
+        this.els.categoryTabs.innerHTML = DISHES_DB.map((cat, idx) => `
+            <button class="category-tab ${idx === App.currentCategory ? 'active' : ''}" data-cat-idx="${idx}">
+                ${cat.emoji} ${cat.category}
+            </button>
+        `).join('');
+        this.els.categoryTabs.querySelectorAll('.category-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                App.currentCategory = parseInt(btn.dataset.catIdx);
+                this.els.categoryTabs.querySelectorAll('.category-tab').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.renderDishCards(this.els.orderSearch.value);
+            });
+        });
+    },
+
+    renderDishCards(searchTerm) {
+        const container = this.els.dishScrollList;
+        const member = App.getCurrentMember();
+        if (!member) return;
+
+        let allDishes = [];
+        if (searchTerm && searchTerm.trim()) {
+            const q = searchTerm.trim().toLowerCase();
+            DISHES_DB.forEach(cat => {
+                cat.items.forEach(item => {
+                    if (item.name.toLowerCase().includes(q)) {
+                        allDishes.push({ ...item, category: cat.category, catEmoji: cat.emoji });
+                    }
+                });
+            });
+        } else {
+            const cat = DISHES_DB[App.currentCategory];
+            allDishes = cat.items.map(item => ({ ...item, category: cat.category, catEmoji: cat.emoji }));
+        }
+
+        if (allDishes.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <p class="empty-text">没有找到这道菜～<br>试试搜索其他菜品吧！</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = allDishes.map(dish => {
+            const ordered = App.isDishOrdered(dish.name);
+            return `
+                <div class="dish-card" data-dish="${this.escapeHtml(dish.name)}">
+                    <div class="dish-card-emoji">${dish.emoji}</div>
+                    <div class="dish-card-info">
+                        <div class="dish-card-name">${dish.name}</div>
+                        <div class="dish-card-category">${dish.category}</div>
+                        ${ordered ? '<div class="dish-card-ordered">✅ 已点过</div>' : ''}
+                    </div>
+                    <button class="dish-card-action ${ordered ? 'ordered' : ''}" data-dish-name="${this.escapeHtml(dish.name)}" data-emoji="${dish.emoji}" data-category="${dish.category}">
+                        ${ordered ? '✅ 已点' : '🤤 我想吃'}
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+        // 绑定点菜事件
+        container.querySelectorAll('.dish-card-action').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const dishName = btn.dataset.dishName;
+                const emoji = btn.dataset.emoji;
+                const category = btn.dataset.category;
+                this.handleOrderDish(dishName, emoji, category, btn);
+            });
+        });
+    },
+
+    handleOrderDish(dishName, emoji, category, btn) {
+        const member = App.getCurrentMember();
+        if (!member) return;
+
+        if (App.isDishOrdered(dishName)) {
+            // 取消点菜
+            const order = App.data.todayOrders.find(o => o.dishName === dishName && o.memberId === App.currentMemberId);
+            if (order) {
+                Storage.removeOrder(order.id);
+                App.data = Storage.getAll();
+                btn.classList.remove('ordered');
+                btn.innerHTML = '🤤 我想吃';
+                const orderedHint = btn.closest('.dish-card').querySelector('.dish-card-ordered');
+                if (orderedHint) orderedHint.remove();
+                this.showToast(`↩️ 已取消「${dishName}」`);
+            }
+        } else {
+            // 点菜
+            Storage.addOrder(dishName, emoji, category, App.currentMemberId);
+            App.data = Storage.getAll();
+            btn.classList.add('ordered');
+            btn.innerHTML = '✅ 已点';
+            const info = btn.closest('.dish-card').querySelector('.dish-card-info');
+            const existing = info.querySelector('.dish-card-ordered');
+            if (!existing) {
+                const hint = document.createElement('div');
+                hint.className = 'dish-card-ordered';
+                hint.textContent = '✅ 已点过';
+                info.appendChild(hint);
+            }
+            this.showToast(`🍽️ 「${dishName}」已加入今日菜单！`);
+        }
+    },
+
+    // ============================
+    // Tab 2: 今日总览
+    // ============================
+    renderTodayTab() {
+        this.renderTodaySummary();
+        this.renderTodayDishes();
+    },
+
+    renderTodaySummary() {
+        const orders = App.data.todayOrders;
+        const memberCount = new Set(orders.map(o => o.memberId)).size;
+        const dishCount = orders.length;
+        const uniqueDishes = new Set(orders.map(o => o.dishName)).size;
+
+        this.els.todaySummary.innerHTML = `
+            <div class="today-summary-card">
+                <div class="num">${dishCount}</div>
+                <div class="label">总点菜次数</div>
+            </div>
+            <div class="today-summary-card">
+                <div class="num">${uniqueDishes}</div>
+                <div class="label">不同菜品</div>
+            </div>
+            <div class="today-summary-card">
+                <div class="num">${memberCount}</div>
+                <div class="label">点餐人数</div>
+            </div>
+        `;
+    },
+
+    renderTodayDishes() {
+        const container = this.els.todayDishes;
+        const orders = App.data.todayOrders;
+
+        if (orders.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">🍜</div>
+                    <p class="empty-text">今天还没点菜呢～<br>去点菜页面选几道吧！</p>
+                </div>
+            `;
+            return;
+        }
+
+        // 按菜品分组
+        const grouped = new Map();
+        orders.forEach(o => {
+            const key = o.dishName;
+            if (!grouped.has(key)) {
+                grouped.set(key, { name: o.dishName, emoji: o.emoji, orders: [] });
+            }
+            grouped.get(key).orders.push(o);
+        });
+
+        container.innerHTML = Array.from(grouped.values()).map(group => {
+            const orderNames = group.orders.map(o => {
+                const m = App.data.members.find(mm => mm.id === o.memberId);
+                return m ? m.name : '未知';
+            });
+            const timeStr = this.formatTime(group.orders[0].orderedAt);
+            return `
+                <div class="today-dish-item">
+                    <div class="today-dish-emoji">${group.emoji}</div>
+                    <div class="today-dish-info">
+                        <div class="today-dish-name">${group.name}</div>
+                        <div class="today-dish-orders">👥 ${orderNames.join('、')} 想吃</div>
+                    </div>
+                    <div class="today-dish-time">${timeStr}</div>
+                </div>
+            `;
+        }).join('');
+    },
+
+    // ============================
+    // Tab 3: 日历历史
+    // ============================
+    initCalendar() {
+        const now = new Date();
+        App.calendarYear = now.getFullYear();
+        App.calendarMonth = now.getMonth();
+
+        this.els.calendarPrev.addEventListener('click', () => {
+            App.calendarMonth--;
+            if (App.calendarMonth < 0) {
+                App.calendarMonth = 11;
+                App.calendarYear--;
+            }
+            this.renderCalendar();
+        });
+        this.els.calendarNext.addEventListener('click', () => {
+            App.calendarMonth++;
+            if (App.calendarMonth > 11) {
+                App.calendarMonth = 0;
+                App.calendarYear++;
+            }
+            this.renderCalendar();
+        });
+    },
+
+    renderCalendar() {
+        const year = App.calendarYear;
+        const month = App.calendarMonth;
+        this.els.calendarMonthLabel.textContent = `${year}年 ${month + 1}月`;
+
+        const today = new Date();
+        const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInPrevMonth = new Date(year, month, 0).getDate();
+        const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+        const datesWithOrders = Storage.getDatesWithOrders();
+
+        let html = '';
+        // weekday headers
+        weekdays.forEach(w => {
+            html += `<div class="cal-weekday">${w}</div>`;
+        });
+
+        // 上月填充
+        for (let i = firstDay - 1; i >= 0; i--) {
+            html += `<div class="cal-day other-month"><span>${daysInPrevMonth - i}</span></div>`;
+        }
+
+        // 本月
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateObj = new Date(year, month, d);
+            const dateStr = dateObj.toLocaleDateString('zh-CN');
+            const isToday = dateObj.toDateString() === today.toDateString();
+            const hasOrder = datesWithOrders.includes(dateStr);
+            const isSelected = App.selectedDate === dateStr;
+
+            html += `<div class="cal-day ${isToday ? 'today' : ''} ${hasOrder ? 'has-order' : ''} ${isSelected ? 'selected' : ''}" data-date="${dateStr}">
+                <span>${d}</span>
+                ${hasOrder ? '<div class="cal-dot"></div>' : ''}
+            </div>`;
+        }
+
+        // 下月填充
+        const totalCells = firstDay + daysInMonth;
+        const remaining = (7 - (totalCells % 7)) % 7;
+        for (let i = 1; i <= remaining; i++) {
+            html += `<div class="cal-day other-month"><span>${i}</span></div>`;
+        }
+
+        this.els.calendarGrid.innerHTML = html;
+
+        // 绑定点击事件
+        this.els.calendarGrid.querySelectorAll('.cal-day:not(.other-month)').forEach(el => {
+            el.addEventListener('click', () => {
+                const dateStr = el.dataset.date;
+                App.selectedDate = dateStr;
+                this.renderCalendar(); // 重新渲染高亮
+                this.showHistoryDetail(dateStr);
+            });
+        });
+
+        // 如果今天有订单，默认选中今天
+        const todayStr = today.toLocaleDateString('zh-CN');
+        if (datesWithOrders.includes(todayStr)) {
+            App.selectedDate = todayStr;
+            this.showHistoryDetail(todayStr);
+        } else {
+            this.els.historyDetail.innerHTML = `
+                <div class="empty-state small">
+                    <p class="empty-text">点击日历中的日期查看历史点菜记录</p>
+                </div>
+            `;
+        }
+    },
+
+    showHistoryDetail(dateStr) {
+        const orders = Storage.getHistoryByDate(dateStr);
+        const container = this.els.historyDetail;
+
+        if (!orders || orders.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state small">
+                    <div class="empty-icon">📭</div>
+                    <p class="empty-text">${dateStr}<br>这天没有点菜记录～</p>
+                </div>
+            `;
+            return;
+        }
+
+        // 按菜品分组
+        const grouped = new Map();
+        orders.forEach(o => {
+            if (!grouped.has(o.dishName)) {
+                grouped.set(o.dishName, { name: o.dishName, emoji: o.emoji, members: [] });
+            }
+            const m = App.data.members.find(mm => mm.id === o.memberId);
+            grouped.get(o.dishName).members.push(m ? m.name : '未知');
+        });
+
+        container.innerHTML = `
+            <div class="history-detail-title">📅 ${dateStr} 的点菜记录</div>
+            ${Array.from(grouped.values()).map(g => `
+                <div class="history-dish-item">
+                    <span style="font-size:24px;">${g.emoji}</span>
+                    <span style="flex:1;font-weight:600;">${g.name}</span>
+                    <span style="font-size:12px;color:var(--text-secondary)">${g.members.join('、')}</span>
+                </div>
+            `).join('')}
+        `;
+    },
+
+    // ============================
+    // 今日操作
+    // ============================
+    setupTodayActions() {
+        // 分享
+        this.els.shareTodayBtn.addEventListener('click', () => this.handleShareToday());
+        // 重置
+        this.els.clearTodayBtn.addEventListener('click', () => this.handleClearToday());
+    },
+
+    async handleShareToday() {
+        const orders = App.data.todayOrders;
+        if (orders.length === 0) {
+            this.showToast('📝 今天还没点菜呢～');
+            return;
+        }
+
+        const grouped = new Map();
+        orders.forEach(o => {
+            if (!grouped.has(o.dishName)) {
+                grouped.set(o.dishName, { name: o.dishName, emoji: o.emoji, orders: [] });
+            }
+            grouped.get(o.dishName).orders.push(o);
+        });
+
+        const memberNames = {};
+        App.data.members.forEach(m => { memberNames[m.id] = m.name; });
+
+        let text = `🍽️ ${new Date().toLocaleDateString('zh-CN')} 晚餐计划 ❤️\n`;
+        text += `━━━━━━━━━━━━━━\n`;
+
+        Array.from(grouped.values()).forEach(g => {
+            const names = g.orders.map(o => memberNames[o.memberId] || '未知').join('、');
+            text += `${g.emoji} ${g.name}（${names}想吃）\n`;
+        });
+
+        text += `━━━━━━━━━━━━━━\n❤️ 一起好好吃饭吧～`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({ text });
+                this.showToast('📤 分享成功！');
+                return;
+            } catch (e) {
+                if (e.name === 'AbortError') return;
+            }
+        }
+        try {
+            await navigator.clipboard.writeText(text);
+            this.showToast('📋 菜单已复制到剪贴板！');
+        } catch {
+            prompt('复制以下内容分享：', text);
+        }
+    },
+
+    async handleClearToday() {
+        const confirmed = await this.showConfirm('🔄 重置今日菜单？', '这将清空今天所有的点菜记录，确定要重置吗？');
+        if (confirmed) {
+            Storage.clearTodayOrders();
+            App.data = Storage.getAll();
+            this.renderTodayTab();
+            this.renderDishList();
+            this.showToast('🔄 已重置今日菜单～');
+        }
+    },
+
+    // ============================
+    // 辅助方法
+    // ============================
+    formatTime(timestamp) {
+        const date = new Date(timestamp);
+        return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    },
+
+    escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    },
+
+    showToast(message) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        this.els.toastContainer.appendChild(toast);
+        setTimeout(() => {
+            toast.classList.add('out');
+            setTimeout(() => toast.remove(), 300);
+        }, 1800);
+    },
+
+    showConfirm(title, text) {
+        return new Promise((resolve) => {
+            this.els.modalTitle.textContent = title;
+            this.els.modalText.textContent = text;
+            this.els.confirmModal.classList.remove('hidden');
+            const handleConfirm = () => {
+                this.els.confirmModal.classList.add('hidden');
+                this.els.modalConfirm.removeEventListener('click', handleConfirm);
+                this.els.modalCancel.removeEventListener('click', handleCancel);
+                resolve(true);
+            };
+            const handleCancel = () => {
+                this.els.confirmModal.classList.add('hidden');
+                this.els.modalConfirm.removeEventListener('click', handleConfirm);
+                this.els.modalCancel.removeEventListener('click', handleCancel);
+                resolve(false);
+            };
+            this.els.modalConfirm.addEventListener('click', handleConfirm);
+            this.els.modalCancel.addEventListener('click', handleCancel);
+        });
+    }
+};
+
+// ============================
+// 应用启动
+// ============================
+function init() {
+    UI.cacheElements();
+    App.init();
+
+    const members = Storage.getMembers();
+    const hasMembers = members.length > 0;
+
+    // === 启动页：总是先显示，点击任意处进入 ===
+    UI.els.splashScreen.addEventListener('click', () => {
+        UI.els.splashScreen.classList.add('hide');
+    });
+
+    // 动画结束后决定显示哪个界面
+    UI.els.splashScreen.addEventListener('animationend', () => {
+        if (!UI.els.splashScreen.classList.contains('hide')) return;
+        UI.els.splashScreen.style.display = 'none';
+
+        if (hasMembers) {
+            // 已有成员，直接进入主应用
+            App.currentMemberId = members[0].id;
+            App.data = Storage.getAll();
+            UI.els.mainApp.classList.add('active');
+            const m = members[0];
+            UI.els.memberAvatar.textContent = m.gender === 'male' ? '👨' : '👩';
+            UI.els.memberName.textContent = m.name;
+            UI.initCalendar();
+            UI.renderDishList();
+            UI.renderTodayTab();
+            UI.renderCalendar();
+        } else {
+            // 首次使用，显示设置界面
+            UI.els.setupScreen.classList.add('active');
+            UI.initSetup();
+        }
+
+        // 以下绑定与是否首次无关
+        initCommon();
+    }, { once: true });
+}
+
+function initCommon() {
+    // 切换成员
+    UI.setupMemberSwitch();
+
+    // Tab 切换
+    UI.setupTabSwitch();
+
+    // 搜索菜品（重新绑定）
+    UI.els.orderSearch.addEventListener('input', () => {
+        UI.renderDishCards(UI.els.orderSearch.value);
+    });
+
+    // 今日操作
+    UI.setupTodayActions();
+
+    // 模态框外部关闭
+    UI.els.confirmModal.addEventListener('click', (e) => {
+        if (e.target === UI.els.confirmModal) {
+            UI.els.confirmModal.classList.add('hidden');
+        }
+    });
+
+    console.log('🍽️ 今晚吃什么 v2.1 ❤️ 已启动！');
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}

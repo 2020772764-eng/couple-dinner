@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>今晚吃什么 ❤️</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FF6B81">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="今晚吃什么">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='36' fill='%23FF6B81'/%3E%3Ctext x='90' y='120' font-size='90' text-anchor='middle' fill='white'%3E🍽%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+    <!-- ==================== 启动加载图 ==================== -->
+    <div id="splash-screen" class="splash-overlay">
+        <img src="picture/Appinterface.png" alt="加载中..." class="splash-img">
+        <p class="splash-hint">点击任意处进入</p>
+    </div>
+
+    <!-- ==================== 设置界面（首次命名） ==================== -->
+    <div id="setup-screen" class="screen">
+        <div id="role-setup" class="setup-step active">
+            <div class="setup-icon">✨</div>
+            <h1 class="setup-title">设定你的角色</h1>
+            <p class="setup-desc">选择性别，给自己起个专属昵称吧</p>
+            <div class="gender-selector">
+                <div class="gender-option" data-gender="male">
+                    <div class="gender-icon">👨</div>
+                    <span class="gender-label">男生</span>
+                </div>
+                <div class="gender-option" data-gender="female">
+                    <div class="gender-icon">👩</div>
+                    <span class="gender-label">女生</span>
+                </div>
+            </div>
+            <div class="setup-input-group" style="margin-top:20px;">
+                <input type="text" id="member-name-input" class="setup-input" placeholder="给自己起个名字吧，如：小米爸爸" maxlength="10" autocomplete="off">
+            </div>
+            <button id="confirm-role-btn" class="setup-btn primary" style="margin-top:16px;" disabled>✅ 确定，进入小家</button>
+        </div>
+    </div>
+
+    <!-- ==================== 主应用 ==================== -->
+    <div id="main-app" class="screen">
+        <!-- 顶部栏 -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-top">
+                    <div class="app-brand">🍽️ 今晚吃什么</div>
+                    <div class="member-info" id="member-info">
+                        <span class="member-avatar" id="member-avatar">👨</span>
+                        <span class="member-name" id="member-name">小米爸爸</span>
+                        <button class="member-switch-btn" id="switch-member-btn">切换</button>
+                    </div>
+                </div>
+                <div class="header-tabs">
+                    <button class="tab-btn active" data-tab="order">📋 点菜</button>
+                    <button class="tab-btn" data-tab="today">📊 今日总览</button>
+                    <button class="tab-btn" data-tab="history">📅 历史</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tab 1: 点菜界面 -->
+        <div id="tab-order" class="tab-content active">
+            <div class="order-search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="order-search" placeholder="搜索菜品..." autocomplete="off">
+            </div>
+            <div class="category-tabs" id="category-tabs">
+                <!-- 由 JS 动态生成分类标签 -->
+            </div>
+            <div class="dish-scroll-list" id="dish-scroll-list">
+                <!-- 由 JS 动态生成菜品列表 -->
+                <div class="empty-state">
+                    <div class="empty-icon">🍜</div>
+                    <p class="empty-text">加载中...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: 今日总览 -->
+        <div id="tab-today" class="tab-content">
+            <div class="today-summary" id="today-summary">
+                <!-- 由 JS 动态生成 -->
+            </div>
+            <div class="today-dishes" id="today-dishes">
+                <!-- 由 JS 动态生成 -->
+            </div>
+            <div class="today-actions">
+                <button id="share-today-btn" class="footer-btn">📤 分享今日菜单</button>
+                <button id="clear-today-btn" class="footer-btn danger">🔄 重置今日</button>
+            </div>
+        </div>
+
+        <!-- Tab 3: 历史记录 -->
+        <div id="tab-history" class="tab-content">
+            <div class="calendar-title">📅 多米家的菜单日历</div>
+            <div class="calendar-nav">
+                <button id="calendar-prev" class="cal-nav-btn">◀</button>
+                <span id="calendar-month-label" class="cal-month-label">2026年 7月</span>
+                <button id="calendar-next" class="cal-nav-btn">▶</button>
+            </div>
+            <div class="calendar-grid" id="calendar-grid">
+                <!-- 由 JS 动态生成 -->
+            </div>
+            <div class="history-detail" id="history-detail">
+                <div class="empty-state small">
+                    <p class="empty-text">点击日历中的日期查看详情</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 家庭成员切换弹窗 ==================== -->
+    <div class="modal-overlay hidden" id="member-modal">
+        <div class="modal-card">
+            <div class="modal-icon">👥</div>
+            <h3 class="modal-title">切换身份</h3>
+            <p class="modal-text">选择以谁的身份来点菜</p>
+            <div class="member-list" id="member-list-modal">
+                <!-- 由 JS 生成 -->
+            </div>
+            <button class="modal-btn cancel" id="member-modal-close" style="margin-top:12px;">关闭</button>
+        </div>
+    </div>
+
+    <!-- ==================== 确认对话框 ==================== -->
+    <div class="modal-overlay hidden" id="confirm-modal">
+        <div class="modal-card">
+            <div class="modal-icon">🤔</div>
+            <h3 class="modal-title" id="modal-title">确认操作</h3>
+            <p class="modal-text" id="modal-text">确定要执行此操作吗？</p>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" id="modal-cancel">取消</button>
+                <button class="modal-btn confirm" id="modal-confirm">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="js/app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            });
+        }
+    </script>
+</body>
+</html>
