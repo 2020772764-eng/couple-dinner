@@ -322,6 +322,12 @@ body {
 .gender-icon {
     font-size: 48px;
 }
+.gender-img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+    border-radius: 50%;
+}
 .gender-label {
     font-size: 16px;
     font-weight: 600;
@@ -376,7 +382,10 @@ body {
     box-shadow: var(--shadow-sm);
 }
 .member-avatar {
-    font-size: 20px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 .member-name {
     font-size: 14px;
@@ -935,7 +944,10 @@ body {
     background: linear-gradient(135deg, #FFF5F7, #FFF0F3);
 }
 .member-list-item .mli-avatar {
-    font-size: 24px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 .member-list-item .mli-name {
     flex: 1;

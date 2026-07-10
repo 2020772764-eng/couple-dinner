@@ -27,7 +27,7 @@ function dismissSplash() {
             const m = members[0];
             const avatar = document.getElementById('member-avatar');
             const name = document.getElementById('member-name');
-            if (avatar) avatar.textContent = m.gender === 'male' ? '👨' : '👩';
+            if (avatar) avatar.src = m.gender === 'male' ? 'picture/Man.webp' : 'picture/Women.webp';
             if (name) name.textContent = m.name;
             UI.initCalendar();
             UI.renderDishList();
@@ -346,7 +346,7 @@ const UI = {
         this.els.setupScreen.classList.remove('active');
         this.els.mainApp.classList.add('active');
         // 更新显示
-        this.els.memberAvatar.textContent = member.gender === 'male' ? '👨' : '👩';
+        this.els.memberAvatar.src = member.gender === 'male' ? 'picture/Man.webp' : 'picture/Women.webp';
         this.els.memberName.textContent = member.name;
         // 渲染主界面
         this.initCalendar();
@@ -377,11 +377,11 @@ const UI = {
     showMemberModal() {
         const members = App.data.members;
         this.els.memberListModal.innerHTML = members.map(m => {
-            const avatar = m.gender === 'male' ? '👨' : '👩';
+            const avatarSrc = m.gender === 'male' ? 'picture/Man.webp' : 'picture/Women.webp';
             const isActive = m.id === App.currentMemberId;
             return `
                 <div class="member-list-item ${isActive ? 'active' : ''}" data-member-id="${m.id}">
-                    <span class="mli-avatar">${avatar}</span>
+                    <img class="mli-avatar" src="${avatarSrc}" alt="头像">
                     <span class="mli-name">${this.escapeHtml(m.name)}</span>
                     ${isActive ? '<span class="mli-check">✅</span>' : '<span class="mli-check" style="color:#ccc;">○</span>'}
                 </div>
@@ -392,7 +392,7 @@ const UI = {
                 const mid = el.dataset.memberId;
                 App.currentMemberId = mid;
                 const member = App.getCurrentMember();
-                this.els.memberAvatar.textContent = member.gender === 'male' ? '👨' : '👩';
+                this.els.memberAvatar.src = member.gender === 'male' ? 'picture/Man.webp' : 'picture/Women.webp';
                 this.els.memberName.textContent = member.name;
                 this.els.memberModal.classList.add('hidden');
                 this.renderDishList();

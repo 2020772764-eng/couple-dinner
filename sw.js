@@ -1,11 +1,13 @@
-const CACHE_NAME = 'couple-dinner-v3';
+const CACHE_NAME = 'couple-dinner-v4';
 const ASSETS = [
     './',
     './index.html',
     './css/style.css',
     './js/app.js',
     './manifest.json',
-    './picture/Appinterface.png'
+    './picture/Appinterface.png',
+    './picture/Man.webp',
+    './picture/Women.webp'
 ];
 
 // 安装时缓存资源
