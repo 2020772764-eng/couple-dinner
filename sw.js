@@ -1,4 +1,4 @@
-const CACHE_NAME = 'couple-dinner-v2';
+const CACHE_NAME = 'couple-dinner-v3';
 const ASSETS = [
     './',
     './index.html',
@@ -31,11 +31,21 @@ self.addEventListener('activate', event => {
     self.clients.claim();
 });
 
-// 拦截请求，优先使用缓存
+// 网络优先：先尝试网络，失败时回退缓存
 self.addEventListener('fetch', event => {
     event.respondWith(
-        caches.match(event.request).then(cached => {
-            return cached || fetch(event.request);
-        })
+        fetch(event.request)
+            .then(response => {
+                // 网络成功 → 更新缓存
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then(cache => {
+                    cache.put(event.request, clone);
+                });
+                return response;
+            })
+            .catch(() => {
+                // 网络失败 → 使用缓存
+                return caches.match(event.request);
+            })
     );
 });
