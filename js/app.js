@@ -4,6 +4,46 @@
  */
 
 // ============================
+// 启动页关闭（全局函数，供 HTML onclick 调用）
+// ============================
+let splashDismissed = false;
+function dismissSplash() {
+    if (splashDismissed) return;
+    splashDismissed = true;
+
+    const splash = document.getElementById('splash-screen');
+    if (!splash) return;
+    splash.classList.add('hide');
+
+    setTimeout(() => {
+        splash.style.display = 'none';
+
+        const members = Storage.getMembers();
+        if (members.length > 0) {
+            App.currentMemberId = members[0].id;
+            App.data = Storage.getAll();
+            const mainApp = document.getElementById('main-app');
+            if (mainApp) mainApp.classList.add('active');
+            const m = members[0];
+            const avatar = document.getElementById('member-avatar');
+            const name = document.getElementById('member-name');
+            if (avatar) avatar.textContent = m.gender === 'male' ? '👨' : '👩';
+            if (name) name.textContent = m.name;
+            UI.initCalendar();
+            UI.renderDishList();
+            UI.renderTodayTab();
+            UI.renderCalendar();
+        } else {
+            const setup = document.getElementById('setup-screen');
+            if (setup) setup.classList.add('active');
+            UI.initSetup();
+        }
+
+        initCommon();
+    }, 500);
+}
+
+// ============================
 // 菜品数据库 - 饭店菜单风格
 // ============================
 const DISHES_DB = [
@@ -829,40 +869,8 @@ function init() {
     UI.cacheElements();
     App.init();
 
-    const members = Storage.getMembers();
-    const hasMembers = members.length > 0;
-
-    // === 启动页：总是先显示，点击任意处进入 ===
-    UI.els.splashScreen.addEventListener('click', () => {
-        UI.els.splashScreen.classList.add('hide');
-    });
-
-    // 动画结束后决定显示哪个界面
-    UI.els.splashScreen.addEventListener('animationend', () => {
-        if (!UI.els.splashScreen.classList.contains('hide')) return;
-        UI.els.splashScreen.style.display = 'none';
-
-        if (hasMembers) {
-            // 已有成员，直接进入主应用
-            App.currentMemberId = members[0].id;
-            App.data = Storage.getAll();
-            UI.els.mainApp.classList.add('active');
-            const m = members[0];
-            UI.els.memberAvatar.textContent = m.gender === 'male' ? '👨' : '👩';
-            UI.els.memberName.textContent = m.name;
-            UI.initCalendar();
-            UI.renderDishList();
-            UI.renderTodayTab();
-            UI.renderCalendar();
-        } else {
-            // 首次使用，显示设置界面
-            UI.els.setupScreen.classList.add('active');
-            UI.initSetup();
-        }
-
-        // 以下绑定与是否首次无关
-        initCommon();
-    }, { once: true });
+    // 启动页点击（js 备份，主要靠 HTML onclick="dismissSplash()"）
+    UI.els.splashScreen.addEventListener('click', dismissSplash);
 }
 
 function initCommon() {
