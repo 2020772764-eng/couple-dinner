@@ -19,7 +19,18 @@ function dismissSplash() {
         splash.style.display = 'none';
 
         const members = Storage.getMembers();
-        if (members.length > 0) {
+        const familyCode = Storage.getFamilyCode();
+
+        if (members.length > 0 && familyCode) {
+            // 已有成员和家庭码 → 初始化同步
+            Sync.init(familyCode);
+            Sync.onChange(remoteData => {
+                Storage.pullFromCloud(remoteData);
+                App.data = Storage.getAll();
+                UI.renderTodayTab();
+                UI.renderDishList();
+            });
+
             App.currentMemberId = members[0].id;
             App.data = Storage.getAll();
             const mainApp = document.getElementById('main-app');
@@ -29,6 +40,8 @@ function dismissSplash() {
             const name = document.getElementById('member-name');
             if (avatar) avatar.src = m.gender === 'male' ? 'picture/Man.webp' : 'picture/Women.webp';
             if (name) name.textContent = m.name;
+            const badge = document.getElementById('family-code-badge');
+            if (badge) badge.textContent = '🏠 家庭码: ' + familyCode;
             UI.initCalendar();
             UI.renderDishList();
             UI.renderTodayTab();
@@ -109,6 +122,7 @@ const Storage = {
 
     getDefault() {
         return {
+            familyCode: '',
             members: [],
             todayOrders: [],    // 今日订单 [{id, dishName, img, category, memberId, orderedAt}]
             historyDates: {}    // { '2026/7/10': [orders], '2026/7/9': [orders] }
@@ -123,6 +137,27 @@ const Storage = {
         }
     },
 
+    // === 家庭码 ===
+    saveFamilyCode(code) {
+        const d = this.getAll();
+        d.familyCode = code;
+        this.save(d);
+    },
+    getFamilyCode() { return this.getAll().familyCode; },
+
+    // === 云端同步 ===
+    syncToCloud() {
+        Sync.save(this.getAll());
+    },
+    pullFromCloud(remoteData) {
+        if (!remoteData || Object.keys(remoteData).length === 0) return;
+        const local = this.getAll();
+        if (remoteData.members) local.members = remoteData.members;
+        if (remoteData.todayOrders) local.todayOrders = remoteData.todayOrders;
+        if (remoteData.historyDates) local.historyDates = remoteData.historyDates;
+        this.save(local);
+    },
+
     // === 成员 ===
     getMembers() { return this.getAll().members; },
     getMember(id) { return this.getMembers().find(m => m.id === id) || null; },
@@ -135,6 +170,7 @@ const Storage = {
         };
         d.members.push(member);
         this.save(d);
+        this.syncToCloud();
         return member;
     },
 
@@ -152,17 +188,20 @@ const Storage = {
         };
         d.todayOrders.push(order);
         this.save(d);
+        this.syncToCloud();
         return order;
     },
     removeOrder(orderId) {
         const d = this.getAll();
         d.todayOrders = d.todayOrders.filter(o => o.id !== orderId);
         this.save(d);
+        this.syncToCloud();
     },
     clearTodayOrders() {
         const d = this.getAll();
         d.todayOrders = [];
         this.save(d);
+        this.syncToCloud();
     },
 
     // === 历史 ===
@@ -239,7 +278,13 @@ const UI = {
 
             // 设置界面
             setupScreen: document.getElementById('setup-screen'),
+            familySetup: document.getElementById('family-setup'),
             roleSetup: document.getElementById('role-setup'),
+            generatedCode: document.getElementById('generated-code'),
+            copyCodeBtn: document.getElementById('copy-code-btn'),
+            familyCodeInput: document.getElementById('family-code-input'),
+            joinFamilyBtn: document.getElementById('join-family-btn'),
+            createFamilyBtn: document.getElementById('create-family-btn'),
             genderOptions: document.querySelectorAll('.gender-option'),
             memberNameInput: document.getElementById('member-name-input'),
             confirmRoleBtn: document.getElementById('confirm-role-btn'),
@@ -289,6 +334,38 @@ const UI = {
     // 设置流程
     // ============================
     initSetup() {
+        // 生成6位随机家庭码
+        const code = Sync.generateCode();
+        this.els.generatedCode.textContent = code;
+
+        // 复制家庭码
+        this.els.copyCodeBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(code).then(() => {
+                this.showToast('📋 家庭码已复制！发给对象吧');
+            }).catch(() => {
+                this.showToast('📋 家庭码: ' + code);
+            });
+        });
+
+        // 加入已有家庭
+        this.els.joinFamilyBtn.addEventListener('click', () => {
+            const inputCode = this.els.familyCodeInput.value.trim().toUpperCase();
+            if (inputCode.length !== 6) {
+                this.showToast('📝 请输入6位家庭码');
+                return;
+            }
+            Sync.init(inputCode);
+            this.els.familySetup.classList.remove('active');
+            this.els.roleSetup.classList.add('active');
+        });
+
+        // 创建新家庭
+        this.els.createFamilyBtn.addEventListener('click', () => {
+            Sync.init(code);
+            this.els.familySetup.classList.remove('active');
+            this.els.roleSetup.classList.add('active');
+        });
+
         // 性别选择
         this.els.genderOptions.forEach(opt => {
             opt.addEventListener('click', () => {
@@ -326,6 +403,10 @@ const UI = {
         }
         const member = Storage.addMember(gender, name);
         App.currentMemberId = member.id;
+        // 保存家庭码到本地
+        Storage.saveFamilyCode(Sync.getCode());
+        // 同步到云端
+        Storage.syncToCloud();
         App.data = Storage.getAll();
         this.enterMainApp(member);
     },
@@ -336,6 +417,9 @@ const UI = {
         // 更新显示
         this.els.memberAvatar.src = member.gender === 'male' ? 'picture/Man.webp' : 'picture/Women.webp';
         this.els.memberName.textContent = member.name;
+        // 显示家庭码
+        const badge = document.getElementById('family-code-badge');
+        if (badge) badge.textContent = '🏠 家庭码: ' + Sync.getCode();
         // 渲染主界面
         this.initCalendar();
         this.renderDishList();

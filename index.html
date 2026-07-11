@@ -22,7 +22,26 @@
 
     <!-- ==================== 设置界面（首次命名） ==================== -->
     <div id="setup-screen" class="screen">
-        <div id="role-setup" class="setup-step active">
+        <!-- 步骤1：家庭码 -->
+        <div id="family-setup" class="setup-step active">
+            <div class="setup-icon">🏠</div>
+            <h1 class="setup-title">创建你们的小家</h1>
+            <p class="setup-desc">输入同一个家庭码，两人数据就能实时同步</p>
+            <div class="setup-code-section">
+                <div class="code-display" id="generated-code">------</div>
+                <button class="code-action-btn" id="copy-code-btn">📋 复制家庭码发给你对象</button>
+            </div>
+            <div class="setup-input-group">
+                <input type="text" id="family-code-input" class="setup-input" placeholder="输入对方的家庭码（6位）" maxlength="6" autocomplete="off">
+                <button id="join-family-btn" class="setup-btn primary">加入</button>
+            </div>
+            <div class="setup-divider"><span>或者</span></div>
+            <button id="create-family-btn" class="setup-btn secondary">🏡 创建新家庭</button>
+            <p class="setup-hint-text">💡 家庭码让你们看到彼此点的菜，实时同步</p>
+        </div>
+
+        <!-- 步骤2：角色设定 -->
+        <div id="role-setup" class="setup-step">
             <div class="setup-icon">✨</div>
             <h1 class="setup-title">设定你的角色</h1>
             <p class="setup-desc">选择性别，给自己起个专属昵称吧</p>
@@ -50,6 +69,7 @@
             <div class="header-content">
                 <div class="header-top">
                     <div class="app-brand">🍽️ 今晚吃什么</div>
+                    <div class="family-code-badge" id="family-code-badge">🏠 家庭码: ------</div>
                     <div class="member-info" id="member-info">
                         <img class="member-avatar" id="member-avatar" src="picture/Man.webp" alt="头像">
                         <span class="member-name" id="member-name">小米爸爸</span>
@@ -145,6 +165,11 @@
     <div class="toast-container" id="toast-container"></div>
 
     <script src="js/app.js"></script>
+    <script src="js/sync.js"></script>
+
+    <!-- Firebase SDK（跨设备同步） -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

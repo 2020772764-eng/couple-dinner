@@ -176,6 +176,13 @@ body {
     margin-bottom: 32px;
 }
 
+.setup-hint-text {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-top: 12px;
+    text-align: center;
+}
+
 .setup-code-section {
     background: linear-gradient(135deg, #FFF5F7, #FFE4E8);
     border: 2px dashed var(--pink-light);
@@ -362,7 +369,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
     margin-bottom: 12px;
+    flex-wrap: wrap;
 }
 
 .app-brand {
@@ -370,6 +379,16 @@ body {
     font-weight: 700;
     color: var(--pink-primary);
     letter-spacing: 1px;
+}
+
+.family-code-badge {
+    font-size: 11px;
+    color: var(--text-light);
+    background: var(--pink-bg);
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-weight: 500;
+    white-space: nowrap;
 }
 
 .member-info {
