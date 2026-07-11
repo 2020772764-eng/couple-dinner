@@ -48,59 +48,47 @@ function dismissSplash() {
 // ============================
 const DISHES_DB = [
     { category: '🔥 热菜', emoji: '🥩', items: [
-        { name: '红烧肉', emoji: '🥩' },
-        { name: '宫保鸡丁', emoji: '🍗' },
-        { name: '鱼香肉丝', emoji: '🐟' },
-        { name: '糖醋里脊', emoji: '🥓' },
-        { name: '麻婆豆腐', emoji: '🫘' },
-        { name: '回锅肉', emoji: '🥩' },
-        { name: '水煮鱼', emoji: '🐟' },
-        { name: '干煸四季豆', emoji: '🥬' },
-        { name: '番茄炒蛋', emoji: '🍅' },
-        { name: '青椒肉丝', emoji: '🌶️' },
-        { name: '可乐鸡翅', emoji: '🍗' },
-        { name: '蒜蓉西兰花', emoji: '🥦' }
-    ]},
-    { category: '🥗 凉菜', emoji: '🥗', items: [
-        { name: '凉拌黄瓜', emoji: '🥒' },
-        { name: '皮蛋豆腐', emoji: '🫘' },
-        { name: '凉拌木耳', emoji: '🍄' },
-        { name: '口水鸡', emoji: '🍗' },
-        { name: '凉拌海带', emoji: '🌿' },
-        { name: '拍黄瓜', emoji: '🥒' }
+        { name: '可乐鸡翅', img: 'picture/热菜/可乐鸡翅.png' },
+        { name: '宫保鸡丁', img: 'picture/热菜/宫保鸡丁.png' },
+        { name: '手撕鸡', img: 'picture/热菜/手撕鸡.png' },
+        { name: '水煮牛肉', img: 'picture/热菜/水煮牛肉.png' },
+        { name: '水煮鱼', img: 'picture/热菜/水煮鱼.png' },
+        { name: '清炒时蔬', img: 'picture/热菜/清炒时蔬.png' },
+        { name: '清蒸鱼', img: 'picture/热菜/清蒸鱼.png' },
+        { name: '火锅', img: 'picture/热菜/火锅.png' },
+        { name: '烧烤', img: 'picture/热菜/烧烤.png' },
+        { name: '烧鸭', img: 'picture/热菜/烧鸭.png' },
+        { name: '番茄炒蛋', img: 'picture/热菜/番茄炒蛋.png' },
+        { name: '糖醋排骨', img: 'picture/热菜/糖醋排骨.png' },
+        { name: '辣椒炒肉', img: 'picture/热菜/辣椒炒肉.png' },
+        { name: '青椒肉丝', img: 'picture/热菜/青椒肉丝.png' },
+        { name: '麻婆豆腐', img: 'picture/热菜/麻婆豆腐.png' }
     ]},
     { category: '🍲 汤类', emoji: '🍲', items: [
-        { name: '番茄蛋汤', emoji: '🍅' },
-        { name: '紫菜蛋花汤', emoji: '🥚' },
-        { name: '排骨汤', emoji: '🍖' },
-        { name: '酸辣汤', emoji: '🌶️' },
-        { name: '玉米排骨汤', emoji: '🌽' },
-        { name: '冬瓜汤', emoji: '🥬' }
+        { name: '冬瓜汤', img: 'picture/汤类/冬瓜汤.png' },
+        { name: '玉米排骨汤', img: 'picture/汤类/玉米排骨汤.png' },
+        { name: '番茄蛋花汤', img: 'picture/汤类/番茄蛋花汤.png' },
+        { name: '紫菜蛋花汤', img: 'picture/汤类/紫菜蛋花汤.png' },
+        { name: '辣牛肉豆腐汤', img: 'picture/汤类/辣牛肉豆腐汤.png' },
+        { name: '香菇鸡汤', img: 'picture/汤类/香菇鸡汤.png' }
     ]},
     { category: '🍚 主食', emoji: '🍚', items: [
-        { name: '米饭', emoji: '🍚' },
-        { name: '面条', emoji: '🍜' },
-        { name: '饺子', emoji: '🥟' },
-        { name: '炒饭', emoji: '🍚' },
-        { name: '馒头', emoji: '🥖' },
-        { name: '包子', emoji: '🥟' },
-        { name: '炒面', emoji: '🍜' }
+        { name: '减脂餐', img: 'picture/主食/减脂餐.png' },
+        { name: '汉堡', img: 'picture/主食/汉堡.png' },
+        { name: '炒面', img: 'picture/主食/炒面.png' },
+        { name: '炒饭', img: 'picture/主食/炒饭.png' },
+        { name: '米饭', img: 'picture/主食/米饭.png' },
+        { name: '面条', img: 'picture/主食/面条.png' },
+        { name: '饺子', img: 'picture/主食/饺子.png' }
     ]},
     { category: '🥤 饮品', emoji: '🥤', items: [
-        { name: '可乐', emoji: '🥤' },
-        { name: '雪碧', emoji: '🥤' },
-        { name: '果汁', emoji: '🧃' },
-        { name: '奶茶', emoji: '🧋' },
-        { name: '咖啡', emoji: '☕' },
-        { name: '柠檬水', emoji: '🍋' }
-    ]},
-    { category: '🍰 甜品', emoji: '🍰', items: [
-        { name: '蛋糕', emoji: '🎂' },
-        { name: '冰淇淋', emoji: '🍦' },
-        { name: '布丁', emoji: '🍮' },
-        { name: '水果捞', emoji: '🍎' },
-        { name: '酸奶', emoji: '🥛' },
-        { name: '双皮奶', emoji: '🍮' }
+        { name: '七喜', img: 'picture/饮品/七喜.png' },
+        { name: '可乐', img: 'picture/饮品/可乐.png' },
+        { name: '咖啡', img: 'picture/饮品/咖啡.png' },
+        { name: '奶茶', img: 'picture/饮品/奶茶.png' },
+        { name: '果汁', img: 'picture/饮品/果汁.png' },
+        { name: '柠檬茶', img: 'picture/饮品/柠檬茶.png' },
+        { name: '雪碧', img: 'picture/饮品/雪碧.png' }
     ]}
 ];
 
@@ -122,7 +110,7 @@ const Storage = {
     getDefault() {
         return {
             members: [],
-            todayOrders: [],    // 今日订单 [{id, dishName, emoji, category, memberId, orderedAt}]
+            todayOrders: [],    // 今日订单 [{id, dishName, img, category, memberId, orderedAt}]
             historyDates: {}    // { '2026/7/10': [orders], '2026/7/9': [orders] }
         };
     },
@@ -152,12 +140,12 @@ const Storage = {
 
     // === 今日订单 ===
     getTodayOrders() { return this.getAll().todayOrders; },
-    addOrder(dishName, emoji, category, memberId) {
+    addOrder(dishName, img, category, memberId) {
         const d = this.getAll();
         const order = {
             id: Date.now() + '_' + Math.random().toString(36).substr(2, 6),
             dishName: dishName.trim(),
-            emoji,
+            img,
             category,
             memberId,
             orderedAt: Date.now()
@@ -485,13 +473,13 @@ const UI = {
             const ordered = App.isDishOrdered(dish.name);
             return `
                 <div class="dish-card" data-dish="${this.escapeHtml(dish.name)}">
-                    <div class="dish-card-emoji">${dish.emoji}</div>
+                    <img class="dish-card-img" src="${dish.img}" alt="${dish.name}">
                     <div class="dish-card-info">
                         <div class="dish-card-name">${dish.name}</div>
                         <div class="dish-card-category">${dish.category}</div>
                         ${ordered ? '<div class="dish-card-ordered">✅ 已点过</div>' : ''}
                     </div>
-                    <button class="dish-card-action ${ordered ? 'ordered' : ''}" data-dish-name="${this.escapeHtml(dish.name)}" data-emoji="${dish.emoji}" data-category="${dish.category}">
+                    <button class="dish-card-action ${ordered ? 'ordered' : ''}" data-dish-name="${this.escapeHtml(dish.name)}" data-img="${dish.img}" data-category="${dish.category}">
                         ${ordered ? '✅ 已点' : '🤤 我想吃'}
                     </button>
                 </div>
@@ -502,14 +490,14 @@ const UI = {
         container.querySelectorAll('.dish-card-action').forEach(btn => {
             btn.addEventListener('click', () => {
                 const dishName = btn.dataset.dishName;
-                const emoji = btn.dataset.emoji;
+                const img = btn.dataset.img;
                 const category = btn.dataset.category;
-                this.handleOrderDish(dishName, emoji, category, btn);
+                this.handleOrderDish(dishName, img, category, btn);
             });
         });
     },
 
-    handleOrderDish(dishName, emoji, category, btn) {
+    handleOrderDish(dishName, img, category, btn) {
         const member = App.getCurrentMember();
         if (!member) return;
 
@@ -527,7 +515,7 @@ const UI = {
             }
         } else {
             // 点菜
-            Storage.addOrder(dishName, emoji, category, App.currentMemberId);
+            Storage.addOrder(dishName, img, category, App.currentMemberId);
             App.data = Storage.getAll();
             btn.classList.add('ordered');
             btn.innerHTML = '✅ 已点';
@@ -592,7 +580,7 @@ const UI = {
         orders.forEach(o => {
             const key = o.dishName;
             if (!grouped.has(key)) {
-                grouped.set(key, { name: o.dishName, emoji: o.emoji, orders: [] });
+                grouped.set(key, { name: o.dishName, img: o.img, orders: [] });
             }
             grouped.get(key).orders.push(o);
         });
@@ -605,7 +593,7 @@ const UI = {
             const timeStr = this.formatTime(group.orders[0].orderedAt);
             return `
                 <div class="today-dish-item">
-                    <div class="today-dish-emoji">${group.emoji}</div>
+                    <img class="today-dish-img" src="${group.img}" alt="${group.name}">
                     <div class="today-dish-info">
                         <div class="today-dish-name">${group.name}</div>
                         <div class="today-dish-orders">👥 ${orderNames.join('、')} 想吃</div>
@@ -730,7 +718,7 @@ const UI = {
         const grouped = new Map();
         orders.forEach(o => {
             if (!grouped.has(o.dishName)) {
-                grouped.set(o.dishName, { name: o.dishName, emoji: o.emoji, members: [] });
+                grouped.set(o.dishName, { name: o.dishName, img: o.img, members: [] });
             }
             const m = App.data.members.find(mm => mm.id === o.memberId);
             grouped.get(o.dishName).members.push(m ? m.name : '未知');
@@ -740,7 +728,7 @@ const UI = {
             <div class="history-detail-title">📅 ${dateStr} 的点菜记录</div>
             ${Array.from(grouped.values()).map(g => `
                 <div class="history-dish-item">
-                    <span style="font-size:24px;">${g.emoji}</span>
+                    <img class="history-dish-img" src="${g.img}" alt="${g.name}">
                     <span style="flex:1;font-weight:600;">${g.name}</span>
                     <span style="font-size:12px;color:var(--text-secondary)">${g.members.join('、')}</span>
                 </div>
@@ -768,7 +756,7 @@ const UI = {
         const grouped = new Map();
         orders.forEach(o => {
             if (!grouped.has(o.dishName)) {
-                grouped.set(o.dishName, { name: o.dishName, emoji: o.emoji, orders: [] });
+                grouped.set(o.dishName, { name: o.dishName, orders: [] });
             }
             grouped.get(o.dishName).orders.push(o);
         });
@@ -781,7 +769,7 @@ const UI = {
 
         Array.from(grouped.values()).forEach(g => {
             const names = g.orders.map(o => memberNames[o.memberId] || '未知').join('、');
-            text += `${g.emoji} ${g.name}（${names}想吃）\n`;
+            text += `🍴 ${g.name}（${names}想吃）\n`;
         });
 
         text += `━━━━━━━━━━━━━━\n❤️ 一起好好吃饭吧～`;
