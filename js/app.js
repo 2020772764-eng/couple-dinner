@@ -48,47 +48,47 @@ function dismissSplash() {
 // ============================
 const DISHES_DB = [
     { category: '🔥 热菜', emoji: '🥩', items: [
-        { name: '可乐鸡翅', img: 'picture/热菜/可乐鸡翅.png' },
-        { name: '宫保鸡丁', img: 'picture/热菜/宫保鸡丁.png' },
-        { name: '手撕鸡', img: 'picture/热菜/手撕鸡.png' },
-        { name: '水煮牛肉', img: 'picture/热菜/水煮牛肉.png' },
-        { name: '水煮鱼', img: 'picture/热菜/水煮鱼.png' },
-        { name: '清炒时蔬', img: 'picture/热菜/清炒时蔬.png' },
-        { name: '清蒸鱼', img: 'picture/热菜/清蒸鱼.png' },
-        { name: '火锅', img: 'picture/热菜/火锅.png' },
-        { name: '烧烤', img: 'picture/热菜/烧烤.png' },
-        { name: '烧鸭', img: 'picture/热菜/烧鸭.png' },
-        { name: '番茄炒蛋', img: 'picture/热菜/番茄炒蛋.png' },
-        { name: '糖醋排骨', img: 'picture/热菜/糖醋排骨.png' },
-        { name: '辣椒炒肉', img: 'picture/热菜/辣椒炒肉.png' },
-        { name: '青椒肉丝', img: 'picture/热菜/青椒肉丝.png' },
-        { name: '麻婆豆腐', img: 'picture/热菜/麻婆豆腐.png' }
+        { name: '可乐鸡翅', img: 'picture/热菜/可乐鸡翅.webp' },
+        { name: '宫保鸡丁', img: 'picture/热菜/宫保鸡丁.webp' },
+        { name: '手撕鸡', img: 'picture/热菜/手撕鸡.webp' },
+        { name: '水煮牛肉', img: 'picture/热菜/水煮牛肉.webp' },
+        { name: '水煮鱼', img: 'picture/热菜/水煮鱼.webp' },
+        { name: '清炒时蔬', img: 'picture/热菜/清炒时蔬.webp' },
+        { name: '清蒸鱼', img: 'picture/热菜/清蒸鱼.webp' },
+        { name: '火锅', img: 'picture/热菜/火锅.webp' },
+        { name: '烧烤', img: 'picture/热菜/烧烤.webp' },
+        { name: '烧鸭', img: 'picture/热菜/烧鸭.webp' },
+        { name: '番茄炒蛋', img: 'picture/热菜/番茄炒蛋.webp' },
+        { name: '糖醋排骨', img: 'picture/热菜/糖醋排骨.webp' },
+        { name: '辣椒炒肉', img: 'picture/热菜/辣椒炒肉.webp' },
+        { name: '青椒肉丝', img: 'picture/热菜/青椒肉丝.webp' },
+        { name: '麻婆豆腐', img: 'picture/热菜/麻婆豆腐.webp' }
     ]},
     { category: '🍲 汤类', emoji: '🍲', items: [
-        { name: '冬瓜汤', img: 'picture/汤类/冬瓜汤.png' },
-        { name: '玉米排骨汤', img: 'picture/汤类/玉米排骨汤.png' },
-        { name: '番茄蛋花汤', img: 'picture/汤类/番茄蛋花汤.png' },
-        { name: '紫菜蛋花汤', img: 'picture/汤类/紫菜蛋花汤.png' },
-        { name: '辣牛肉豆腐汤', img: 'picture/汤类/辣牛肉豆腐汤.png' },
-        { name: '香菇鸡汤', img: 'picture/汤类/香菇鸡汤.png' }
+        { name: '冬瓜汤', img: 'picture/汤类/冬瓜汤.webp' },
+        { name: '玉米排骨汤', img: 'picture/汤类/玉米排骨汤.webp' },
+        { name: '番茄蛋花汤', img: 'picture/汤类/番茄蛋花汤.webp' },
+        { name: '紫菜蛋花汤', img: 'picture/汤类/紫菜蛋花汤.webp' },
+        { name: '辣牛肉豆腐汤', img: 'picture/汤类/辣牛肉豆腐汤.webp' },
+        { name: '香菇鸡汤', img: 'picture/汤类/香菇鸡汤.webp' }
     ]},
     { category: '🍚 主食', emoji: '🍚', items: [
-        { name: '减脂餐', img: 'picture/主食/减脂餐.png' },
-        { name: '汉堡', img: 'picture/主食/汉堡.png' },
-        { name: '炒面', img: 'picture/主食/炒面.png' },
-        { name: '炒饭', img: 'picture/主食/炒饭.png' },
-        { name: '米饭', img: 'picture/主食/米饭.png' },
-        { name: '面条', img: 'picture/主食/面条.png' },
-        { name: '饺子', img: 'picture/主食/饺子.png' }
+        { name: '减脂餐', img: 'picture/主食/减脂餐.webp' },
+        { name: '汉堡', img: 'picture/主食/汉堡.webp' },
+        { name: '炒面', img: 'picture/主食/炒面.webp' },
+        { name: '炒饭', img: 'picture/主食/炒饭.webp' },
+        { name: '米饭', img: 'picture/主食/米饭.webp' },
+        { name: '面条', img: 'picture/主食/面条.webp' },
+        { name: '饺子', img: 'picture/主食/饺子.webp' }
     ]},
     { category: '🥤 饮品', emoji: '🥤', items: [
-        { name: '七喜', img: 'picture/饮品/七喜.png' },
-        { name: '可乐', img: 'picture/饮品/可乐.png' },
-        { name: '咖啡', img: 'picture/饮品/咖啡.png' },
-        { name: '奶茶', img: 'picture/饮品/奶茶.png' },
-        { name: '果汁', img: 'picture/饮品/果汁.png' },
-        { name: '柠檬茶', img: 'picture/饮品/柠檬茶.png' },
-        { name: '雪碧', img: 'picture/饮品/雪碧.png' }
+        { name: '七喜', img: 'picture/饮品/七喜.webp' },
+        { name: '可乐', img: 'picture/饮品/可乐.webp' },
+        { name: '咖啡', img: 'picture/饮品/咖啡.webp' },
+        { name: '奶茶', img: 'picture/饮品/奶茶.webp' },
+        { name: '果汁', img: 'picture/饮品/果汁.webp' },
+        { name: '柠檬茶', img: 'picture/饮品/柠檬茶.webp' },
+        { name: '雪碧', img: 'picture/饮品/雪碧.webp' }
     ]}
 ];
 

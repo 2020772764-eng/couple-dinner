@@ -1,11 +1,11 @@
-const CACHE_NAME = 'couple-dinner-v4';
+const CACHE_NAME = 'couple-dinner-v5';
 const ASSETS = [
     './',
     './index.html',
     './css/style.css',
     './js/app.js',
     './manifest.json',
-    './picture/Appinterface.png',
+    './picture/Appinterface.webp',
     './picture/Man.webp',
     './picture/Women.webp'
 ];
