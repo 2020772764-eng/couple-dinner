@@ -20,10 +20,11 @@ function dismissSplash() {
 
         const members = Storage.getMembers();
         const familyCode = Storage.getFamilyCode();
+        const storeUrl = Storage.getStoreUrl();
 
         if (members.length > 0 && familyCode) {
             // 已有成员和家庭码 → 初始化同步
-            Sync.init(familyCode);
+            Sync.init(familyCode, storeUrl);
             Sync.onChange(remoteData => {
                 Storage.pullFromCloud(remoteData);
                 App.data = Storage.getAll();
@@ -123,6 +124,7 @@ const Storage = {
     getDefault() {
         return {
             familyCode: '',
+            storeUrl: '',
             members: [],
             todayOrders: [],    // 今日订单 [{id, dishName, img, category, memberId, orderedAt}]
             historyDates: {}    // { '2026/7/10': [orders], '2026/7/9': [orders] }
@@ -138,12 +140,14 @@ const Storage = {
     },
 
     // === 家庭码 ===
-    saveFamilyCode(code) {
+    saveFamilyInfo(code, url) {
         const d = this.getAll();
         d.familyCode = code;
+        d.storeUrl = url;
         this.save(d);
     },
     getFamilyCode() { return this.getAll().familyCode; },
+    getStoreUrl() { return this.getAll().storeUrl; },
 
     // === 云端同步 ===
     syncToCloud() {
@@ -334,34 +338,45 @@ const UI = {
     // 设置流程
     // ============================
     initSetup() {
-        // 生成6位随机家庭码
+        // 生成6位随机家庭码（显示用）
         const code = Sync.generateCode();
         this.els.generatedCode.textContent = code;
 
-        // 复制家庭码
+        // 复制邀请码
         this.els.copyCodeBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(code).then(() => {
+            // 复制家庭码
+            navigator.clipboard.writeText(Sync.getCode() || code).then(() => {
                 this.showToast('📋 家庭码已复制！发给对象吧');
             }).catch(() => {
-                this.showToast('📋 家庭码: ' + code);
+                this.showToast('📋 家庭码: ' + (Sync.getCode() || code));
             });
         });
 
         // 加入已有家庭
-        this.els.joinFamilyBtn.addEventListener('click', () => {
+        this.els.joinFamilyBtn.addEventListener('click', async () => {
             const inputCode = this.els.familyCodeInput.value.trim().toUpperCase();
-            if (inputCode.length !== 6) {
-                this.showToast('📝 请输入6位家庭码');
+            if (inputCode.length < 6) {
+                this.showToast('📝 请输入完整家庭码');
                 return;
             }
-            Sync.init(inputCode);
+            this.showToast('🔍 正在查找家庭...');
+            const ok = await Sync.joinFamily(inputCode);
+            if (!ok) {
+                this.showToast('❌ 未找到该家庭码，请确认');
+                return;
+            }
             this.els.familySetup.classList.remove('active');
             this.els.roleSetup.classList.add('active');
         });
 
         // 创建新家庭
-        this.els.createFamilyBtn.addEventListener('click', () => {
-            Sync.init(code);
+        this.els.createFamilyBtn.addEventListener('click', async () => {
+            this.showToast('⏳ 正在创建家庭...');
+            const newCode = await Sync.createFamily();
+            if (newCode) {
+                this.els.generatedCode.textContent = newCode;
+                this.showToast('✅ 家庭创建成功！家庭码: ' + newCode);
+            }
             this.els.familySetup.classList.remove('active');
             this.els.roleSetup.classList.add('active');
         });
@@ -403,8 +418,8 @@ const UI = {
         }
         const member = Storage.addMember(gender, name);
         App.currentMemberId = member.id;
-        // 保存家庭码到本地
-        Storage.saveFamilyCode(Sync.getCode());
+        // 保存家庭码和云端URL到本地
+        Storage.saveFamilyInfo(Sync.getCode(), Sync.getStoreUrl());
         // 同步到云端
         Storage.syncToCloud();
         App.data = Storage.getAll();
