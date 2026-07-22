@@ -1,9 +1,10 @@
-const CACHE_NAME = 'couple-dinner-v5';
+const CACHE_NAME = 'couple-dinner-v6';
 const ASSETS = [
     './',
     './index.html',
     './css/style.css',
     './js/app.js',
+    './js/sync.js',
     './manifest.json',
     './picture/Appinterface.webp',
     './picture/Man.webp',

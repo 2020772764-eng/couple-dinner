@@ -52,9 +52,15 @@ const Sync = {
             const loc = resp.headers.get('Location');
             this.storeUrl = loc.startsWith('http') ? loc : 'https://jsonblob.com' + loc;
 
-            // 2. 生成家庭码（前6位）
-            const uuid = this.storeUrl.split('/').pop();
-            this.familyCode = uuid.substring(0, 6).toUpperCase();
+            // 2. 生成随机6位家庭码（不用UUID前几位，避免所有码雷同）
+            this.familyCode = Sync.generateCode();
+
+            // 确保目录中不存在重复码
+            let exists = await this._lookup(this.familyCode);
+            while (exists) {
+                this.familyCode = Sync.generateCode();
+                exists = await this._lookup(this.familyCode);
+            }
 
             // 3. 注册到目录
             await this._register(this.familyCode, this.storeUrl);
