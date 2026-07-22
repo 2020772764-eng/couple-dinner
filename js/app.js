@@ -347,13 +347,9 @@ const UI = {
     // 设置流程
     // ============================
     initSetup() {
-        // 防止重复绑定事件监听器
+        // 只绑定一次事件监听器，绝不重复绑定
         if (this._setupBound) return;
         this._setupBound = true;
-
-        // 初始隐藏家庭码展示区，创建家庭后才显示
-        const codeSection = document.querySelector('.setup-code-section');
-        if (codeSection) codeSection.style.display = 'none';
 
         // 复制邀请码
         this.els.copyCodeBtn.addEventListener('click', () => {
@@ -364,14 +360,13 @@ const UI = {
             });
         });
 
-        // 加入已有家庭
-        this.els.joinFamilyBtn.addEventListener('click', async () => {
+        // 加入已有家庭（用命名函数避免闭包叠加）
+        this._handleJoin = async () => {
             const inputCode = this.els.familyCodeInput.value.trim().toUpperCase();
             if (inputCode.length < 6) {
                 this.showToast('📝 请输入完整家庭码');
                 return;
             }
-            // 防重复点击
             this.els.joinFamilyBtn.disabled = true;
             this.els.joinFamilyBtn.textContent = '查找中...';
             this.showToast('🔍 正在查找家庭...');
@@ -384,11 +379,11 @@ const UI = {
             }
             this.els.familySetup.classList.remove('active');
             this.els.roleSetup.classList.add('active');
-        });
+        };
+        this.els.joinFamilyBtn.addEventListener('click', this._handleJoin);
 
-        // 创建新家庭
-        this.els.createFamilyBtn.addEventListener('click', async () => {
-            // 防重复点击
+        // 创建新家庭（用命名函数避免闭包叠加）
+        this._handleCreate = async () => {
             this.els.createFamilyBtn.disabled = true;
             this.els.createFamilyBtn.textContent = '创建中...';
             this.showToast('⏳ 正在创建家庭...');
@@ -397,22 +392,23 @@ const UI = {
             this.els.createFamilyBtn.textContent = '🏡 创建新家庭';
             if (newCode) {
                 this.els.generatedCode.textContent = newCode;
-                // 显示家庭码展示区
                 const codeSection = document.querySelector('.setup-code-section');
                 if (codeSection) codeSection.style.display = '';
                 this.showToast('✅ 家庭创建成功！家庭码: ' + newCode);
             }
             this.els.familySetup.classList.remove('active');
             this.els.roleSetup.classList.add('active');
-        });
+        };
+        this.els.createFamilyBtn.addEventListener('click', this._handleCreate);
 
         // 性别选择
+        this._handleGender = (e) => {
+            this.els.genderOptions.forEach(o => o.classList.remove('selected'));
+            e.currentTarget.classList.add('selected');
+            this.checkRoleReady();
+        };
         this.els.genderOptions.forEach(opt => {
-            opt.addEventListener('click', () => {
-                this.els.genderOptions.forEach(o => o.classList.remove('selected'));
-                opt.classList.add('selected');
-                this.checkRoleReady();
-            });
+            opt.addEventListener('click', this._handleGender);
         });
 
         // 昵称输入
@@ -425,6 +421,19 @@ const UI = {
 
         // 确认角色
         this.els.confirmRoleBtn.addEventListener('click', () => this.handleConfirmRole());
+    },
+
+    // 重置设置界面 UI（退出家庭后调用，不重复绑定事件）
+    resetSetupUI() {
+        const codeSection = document.querySelector('.setup-code-section');
+        if (codeSection) codeSection.style.display = 'none';
+        this.els.familySetup.classList.add('active');
+        this.els.roleSetup.classList.remove('active');
+        this.els.generatedCode.textContent = '------';
+        this.els.familyCodeInput.value = '';
+        this.els.genderOptions.forEach(o => o.classList.remove('selected'));
+        this.els.memberNameInput.value = '';
+        this.els.confirmRoleBtn.disabled = true;
     },
 
     checkRoleReady() {
@@ -522,21 +531,8 @@ const UI = {
         this.els.mainApp.classList.remove('active');
         this.els.setupScreen.classList.add('active');
 
-        // 重置设置步骤
-        this.els.familySetup.classList.add('active');
-        this.els.roleSetup.classList.remove('active');
-        this.els.familyCodeInput.value = '';
-        this.els.genderOptions.forEach(o => o.classList.remove('selected'));
-        this.els.memberNameInput.value = '';
-        this.els.confirmRoleBtn.disabled = true;
-
-        // 隐藏家庭码展示区
-        const codeSection = document.querySelector('.setup-code-section');
-        if (codeSection) codeSection.style.display = 'none';
-
-        // 重置绑定标记，允许重新初始化
-        this._setupBound = false;
-        this.initSetup();
+        // 重置 UI（不重复绑定事件）
+        this.resetSetupUI();
 
         this.showToast('👋 已退出家庭，可以重新创建了');
     },
