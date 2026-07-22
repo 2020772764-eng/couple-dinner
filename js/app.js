@@ -298,6 +298,7 @@ const UI = {
             memberAvatar: document.getElementById('member-avatar'),
             memberName: document.getElementById('member-name'),
             switchMemberBtn: document.getElementById('switch-member-btn'),
+            leaveFamilyBtn: document.getElementById('leave-family-btn'),
             tabBtns: document.querySelectorAll('.tab-btn'),
             tabOrder: document.getElementById('tab-order'),
             tabToday: document.getElementById('tab-today'),
@@ -459,6 +460,51 @@ const UI = {
                 this.els.memberModal.classList.add('hidden');
             }
         });
+    },
+
+    setupLeaveFamily() {
+        this.els.leaveFamilyBtn.addEventListener('click', () => this.handleLeaveFamily());
+    },
+
+    async handleLeaveFamily() {
+        const confirmed = await this.showConfirm(
+            '🚪 退出家庭',
+            '退出后将清除所有本地数据，你可以重新创建或加入新的家庭。\n\n确定要退出吗？'
+        );
+        if (!confirmed) return;
+
+        // 停止同步轮询
+        Sync.stopPolling();
+
+        // 清除所有本地存储数据
+        localStorage.removeItem(Storage.KEY);
+        localStorage.removeItem('couple_last_date');
+
+        // 重置应用状态
+        App.data = Storage.getAll();
+        App.currentMemberId = null;
+        App.currentCategory = 0;
+
+        // 切换到设置界面
+        this.els.mainApp.classList.remove('active');
+        this.els.setupScreen.classList.add('active');
+
+        // 重置设置步骤
+        this.els.familySetup.classList.add('active');
+        this.els.roleSetup.classList.remove('active');
+        this.els.familyCodeInput.value = '';
+        this.els.genderOptions.forEach(o => o.classList.remove('selected'));
+        this.els.memberNameInput.value = '';
+        this.els.confirmRoleBtn.disabled = true;
+
+        // 重新生成家庭码显示
+        const newCode = Sync.generateCode();
+        this.els.generatedCode.textContent = newCode;
+
+        // 重新初始化设置界面事件
+        this.initSetup();
+
+        this.showToast('👋 已退出家庭，可以重新创建了');
     },
 
     showMemberModal() {
@@ -963,6 +1009,9 @@ function init() {
 function initCommon() {
     // 切换成员
     UI.setupMemberSwitch();
+
+    // 退出家庭
+    UI.setupLeaveFamily();
 
     // Tab 切换
     UI.setupTabSwitch();

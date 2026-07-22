@@ -220,6 +220,13 @@ body {
     display: flex;
     gap: 10px;
     margin-bottom: 12px;
+    align-items: stretch;
+}
+.setup-input-group .setup-btn {
+    width: auto;
+    flex-shrink: 0;
+    padding: 14px 22px;
+    white-space: nowrap;
 }
 
 .setup-input {
@@ -424,6 +431,27 @@ body {
 }
 .member-switch-btn:active {
     transform: scale(0.92);
+}
+
+/* 退出家庭按钮 */
+.leave-family-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 107, 107, 0.1);
+    color: #FF6B6B;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.leave-family-btn:active {
+    transform: scale(0.9);
+    background: rgba(255, 107, 107, 0.2);
 }
 
 /* Tab 切换栏 */

@@ -52,9 +52,9 @@ const Sync = {
             const loc = resp.headers.get('Location');
             this.storeUrl = loc.startsWith('http') ? loc : 'https://jsonblob.com' + loc;
 
-            // 2. 生成家庭码（前8位）
+            // 2. 生成家庭码（前6位）
             const uuid = this.storeUrl.split('/').pop();
-            this.familyCode = uuid.substring(0, 8).toUpperCase();
+            this.familyCode = uuid.substring(0, 6).toUpperCase();
 
             // 3. 注册到目录
             await this._register(this.familyCode, this.storeUrl);
