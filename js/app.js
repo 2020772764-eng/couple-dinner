@@ -339,17 +339,20 @@ const UI = {
     // 设置流程
     // ============================
     initSetup() {
-        // 生成6位随机家庭码（显示用）
-        const code = Sync.generateCode();
-        this.els.generatedCode.textContent = code;
+        // 防止重复绑定事件监听器
+        if (this._setupBound) return;
+        this._setupBound = true;
+
+        // 初始隐藏家庭码展示区，创建家庭后才显示
+        const codeSection = document.querySelector('.setup-code-section');
+        if (codeSection) codeSection.style.display = 'none';
 
         // 复制邀请码
         this.els.copyCodeBtn.addEventListener('click', () => {
-            // 复制家庭码
-            navigator.clipboard.writeText(Sync.getCode() || code).then(() => {
+            navigator.clipboard.writeText(Sync.getCode()).then(() => {
                 this.showToast('📋 家庭码已复制！发给对象吧');
             }).catch(() => {
-                this.showToast('📋 家庭码: ' + (Sync.getCode() || code));
+                this.showToast('📋 家庭码: ' + Sync.getCode());
             });
         });
 
@@ -376,6 +379,9 @@ const UI = {
             const newCode = await Sync.createFamily();
             if (newCode) {
                 this.els.generatedCode.textContent = newCode;
+                // 显示家庭码展示区
+                const codeSection = document.querySelector('.setup-code-section');
+                if (codeSection) codeSection.style.display = '';
                 this.showToast('✅ 家庭创建成功！家庭码: ' + newCode);
             }
             this.els.familySetup.classList.remove('active');
@@ -497,11 +503,12 @@ const UI = {
         this.els.memberNameInput.value = '';
         this.els.confirmRoleBtn.disabled = true;
 
-        // 重新生成家庭码显示
-        const newCode = Sync.generateCode();
-        this.els.generatedCode.textContent = newCode;
+        // 隐藏家庭码展示区
+        const codeSection = document.querySelector('.setup-code-section');
+        if (codeSection) codeSection.style.display = 'none';
 
-        // 重新初始化设置界面事件
+        // 重置绑定标记，允许重新初始化
+        this._setupBound = false;
         this.initSetup();
 
         this.showToast('👋 已退出家庭，可以重新创建了');
