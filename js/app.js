@@ -25,8 +25,17 @@ function dismissSplash() {
         if (members.length > 0 && familyCode) {
             // 已有成员和家庭码 → 初始化同步
             Sync.init(familyCode, storeUrl);
+            let _lastOrdersLen = (Storage.getTodayOrders() || []).length;
             Sync.onChange(remoteData => {
                 Storage.pullFromCloud(remoteData);
+                const newOrders = Storage.getTodayOrders() || [];
+                // 数据没变就不重绘，避免屏闪
+                if (newOrders.length === _lastOrdersLen) {
+                    // 数量相同但内容可能不同（如取消点菜），简单做深对比
+                    const same = JSON.stringify(App.data.todayOrders) === JSON.stringify(newOrders);
+                    if (same) return;
+                }
+                _lastOrdersLen = newOrders.length;
                 App.data = Storage.getAll();
                 UI.renderTodayTab();
                 UI.renderDishList();
@@ -569,10 +578,6 @@ const UI = {
         this.renderCategoryTabs();
         // 渲染菜品
         this.renderDishCards(searchTerm);
-        // 搜索
-        this.els.orderSearch.addEventListener('input', () => {
-            this.renderDishCards(this.els.orderSearch.value);
-        });
     },
 
     renderCategoryTabs() {

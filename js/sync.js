@@ -142,7 +142,7 @@ const Sync = {
                     this.listeners.forEach(fn => fn(data));
                 }
             }
-        }, 2000);
+        }, 5000);
     },
 
     stopPolling() {
