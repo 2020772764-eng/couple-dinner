@@ -306,7 +306,6 @@ const UI = {
             mainApp: document.getElementById('main-app'),
             memberAvatar: document.getElementById('member-avatar'),
             memberName: document.getElementById('member-name'),
-            switchMemberBtn: document.getElementById('switch-member-btn'),
             leaveFamilyBtn: document.getElementById('leave-family-btn'),
             tabBtns: document.querySelectorAll('.tab-btn'),
             tabOrder: document.getElementById('tab-order'),
@@ -372,8 +371,13 @@ const UI = {
                 this.showToast('📝 请输入完整家庭码');
                 return;
             }
+            // 防重复点击
+            this.els.joinFamilyBtn.disabled = true;
+            this.els.joinFamilyBtn.textContent = '查找中...';
             this.showToast('🔍 正在查找家庭...');
             const ok = await Sync.joinFamily(inputCode);
+            this.els.joinFamilyBtn.disabled = false;
+            this.els.joinFamilyBtn.textContent = '加入';
             if (!ok) {
                 this.showToast('❌ 未找到该家庭码，请确认');
                 return;
@@ -384,8 +388,13 @@ const UI = {
 
         // 创建新家庭
         this.els.createFamilyBtn.addEventListener('click', async () => {
+            // 防重复点击
+            this.els.createFamilyBtn.disabled = true;
+            this.els.createFamilyBtn.textContent = '创建中...';
             this.showToast('⏳ 正在创建家庭...');
             const newCode = await Sync.createFamily();
+            this.els.createFamilyBtn.disabled = false;
+            this.els.createFamilyBtn.textContent = '🏡 创建新家庭';
             if (newCode) {
                 this.els.generatedCode.textContent = newCode;
                 // 显示家庭码展示区
@@ -466,7 +475,16 @@ const UI = {
     // 成员切换
     // ============================
     setupMemberSwitch() {
-        this.els.switchMemberBtn.addEventListener('click', () => this.showMemberModal());
+        // 点击头像或名字区域打开成员切换
+        const memberInfo = document.getElementById('member-info');
+        if (memberInfo) {
+            memberInfo.style.cursor = 'pointer';
+            memberInfo.addEventListener('click', (e) => {
+                // 不拦截退出按钮的点击
+                if (e.target.id === 'leave-family-btn') return;
+                this.showMemberModal();
+            });
+        }
         this.els.memberModalClose.addEventListener('click', () => {
             this.els.memberModal.classList.add('hidden');
         });
@@ -488,8 +506,8 @@ const UI = {
         );
         if (!confirmed) return;
 
-        // 停止同步轮询
-        Sync.stopPolling();
+        // 停止同步并重置
+        Sync.reset();
 
         // 清除所有本地存储数据
         localStorage.removeItem(Storage.KEY);

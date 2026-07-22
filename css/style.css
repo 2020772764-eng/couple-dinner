@@ -433,24 +433,22 @@ body {
     transform: scale(0.92);
 }
 
-/* 退出家庭按钮 */
+/* 退出家庭按钮（替换了原来的切换按钮） */
 .leave-family-btn {
-    width: 30px;
-    height: 30px;
+    padding: 4px 10px;
     border: none;
-    border-radius: 50%;
+    border-radius: 12px;
     background: rgba(255, 107, 107, 0.1);
     color: #FF6B6B;
-    font-size: 14px;
+    font-size: 12px;
+    font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    white-space: nowrap;
     flex-shrink: 0;
 }
 .leave-family-btn:active {
-    transform: scale(0.9);
+    transform: scale(0.92);
     background: rgba(255, 107, 107, 0.2);
 }
 

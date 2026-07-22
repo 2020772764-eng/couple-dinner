@@ -149,6 +149,14 @@ const Sync = {
         if (this.pollTimer) { clearInterval(this.pollTimer); this.pollTimer = null; }
     },
 
+    reset() {
+        this.stopPolling();
+        this.familyCode = null;
+        this.storeUrl = null;
+        this.lastHash = '';
+        this.listeners = [];
+    },
+
     onChange(fn) { this.listeners.push(fn); },
     getCode() { return this.familyCode; },
     getStoreUrl() { return this.storeUrl; },
