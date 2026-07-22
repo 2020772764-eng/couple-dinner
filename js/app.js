@@ -1039,6 +1039,20 @@ function initCommon() {
     // 退出家庭
     UI.setupLeaveFamily();
 
+    // 家庭码点击复制
+    const badge = document.getElementById('family-code-badge');
+    if (badge) {
+        badge.addEventListener('click', () => {
+            const code = Sync.getCode();
+            if (!code) return;
+            navigator.clipboard.writeText(code).then(() => {
+                UI.showToast('📋 家庭码已复制：' + code);
+            }).catch(() => {
+                UI.showToast('📋 家庭码: ' + code);
+            });
+        });
+    }
+
     // Tab 切换
     UI.setupTabSwitch();
 

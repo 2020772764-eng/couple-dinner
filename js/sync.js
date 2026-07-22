@@ -4,7 +4,7 @@
  */
 
 // 全局目录：存所有家庭码 → 数据 URL 的映射
-const DIRECTORY_URL = 'https://jsonblob.com/api/jsonBlob/019f5183-cc4a-74cb-885d-23da5f76d5f2';
+const DIRECTORY_URL = 'https://jsonblob.com/api/jsonBlob/019f8a12-a5e0-7503-898f-769281c58914';
 
 const Sync = {
     familyCode: null,

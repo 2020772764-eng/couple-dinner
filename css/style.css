@@ -396,6 +396,15 @@ body {
     border-radius: 10px;
     font-weight: 500;
     white-space: nowrap;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.family-code-badge:hover {
+    background: #FFE4E8;
+}
+.family-code-badge:active {
+    transform: scale(0.95);
+    background: var(--pink-light);
 }
 
 .member-info {
